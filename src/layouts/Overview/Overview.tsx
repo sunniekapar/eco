@@ -6,38 +6,107 @@ import StyledCard, {
 } from '@/components/StyledCard';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import FoodList from './components/FoodList';
+import { useEffect, useState } from "react";
+
+import { createClient } from "@supabase/supabase-js";
+
+const SUPABASE_PROJECT_URL="https://ebsamovagbktsulxqrzi.supabase.co"
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVic2Ftb3ZhZ2JrdHN1bHhxcnppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDgxNDA0NTMsImV4cCI6MjAyMzcxNjQ1M30.MgTZj2K4a7HydhTDNdVDDEKqtT8aSHkkCGPECvrJ-GM"
+
+const supabase = createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
 
 export default function Overview() {
-  const chartData = {
+
+  const chartDataDefault = {
     dataKey: 'kg',
     xAxisKey: 'name',
     data: [
       {
         name: 'Jan.',
-        kg: 10,
+        kg: 0,
       },
       {
         name: 'Feb.',
-        kg: 13,
+        kg: 0,
       },
       {
         name: 'Mar.',
-        kg: 18,
+        kg: 0,
       },
       {
         name: 'Apr.',
-        kg: 8,
+        kg: 0,
       },
       {
         name: 'May',
-        kg: 9,
+        kg: 0,
       },
       {
-        name: 'Jun.',
-        kg: 6,
+        name: 'June',
+        kg: 0,
       },
+      {
+        name: 'July',
+        kg: 0,
+      },
+      {
+        name: 'August',
+        kg: 0,
+      },
+      {
+        name: 'Sept.',
+        kg: 0,
+      },
+      {
+        name: 'Oct.',
+        kg: 0,
+      },
+      {
+        name: 'Nov.',
+        kg: 0,
+      },
+      {
+        name: 'Dec.',
+        kg: 0,
+      }
     ],
   };
+  const [ chartData, setChartData ] = useState(chartDataDefault);
+
+  useEffect(() => {
+    updateStateWithUserData();
+  });
+
+  async function updateStateWithUserData() {
+    const { data } = await supabase
+      .from("user_data")
+      .select("history")
+      .eq("name", "Test user 0");
+
+    const nextChartData: {
+        name: string;
+        kg: number;
+    }[] = chartDataDefault.data.map((month, idx) => ({
+      name: month.name,
+      kg: data ? data[0].history[idx] : 0
+    }));
+
+    setChartData(prevState => {
+      const newState = prevState;
+      newState.data = nextChartData;
+      return newState;
+    })
+
+    console.log("Updated.");
+  }
+
+  const data = [
+    {
+      item: 'Lettuce',
+      expiryDate: 'Mar. 2023',
+      count: 1
+    }
+  ]
 
   return (
     <>
@@ -49,7 +118,7 @@ export default function Overview() {
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[450px]">
-                <FoodList />
+                <FoodList data={data} />
               </ScrollArea>
             </CardContent>
           </StyledCard>

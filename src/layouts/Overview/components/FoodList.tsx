@@ -1,13 +1,12 @@
 import { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-export default function FoodList() {
-  const data = [
-    {
-      item: 'Lettuce',
-      expiryDate: 'Mar. 2023',
-      count: '1'
-    }
-  ]
+type Props = {
+  item: string,
+  expiryDate: string,
+  count: number
+}
+
+export default function FoodList({ data }: { data: Props[] }) {
   return (
     <Table>
       <TableCaption>A list of all the items in your fridge.</TableCaption>
