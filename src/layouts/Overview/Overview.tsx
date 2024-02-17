@@ -15,6 +15,12 @@ const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 const supabase = createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
 
+type TListData = {
+    item: string;
+    expiryDate: string;
+    count: number;
+}[]
+
 export default function Overview() {
 
   const chartDataDefault = {
@@ -72,12 +78,14 @@ export default function Overview() {
     ],
   };
   const [ chartData, setChartData ] = useState(chartDataDefault);
+  const [ listData, setListData ] = useState<TListData|null>(null);
 
   useEffect(() => {
-    updateStateWithUserData();
-  });
+    updateChartData();
+    updateListData();
+  }, []);
 
-  async function updateStateWithUserData() {
+  async function updateChartData() {
     const { data } = await supabase
       .from("user_data")
       .select("history")
@@ -97,16 +105,29 @@ export default function Overview() {
       return newState;
     })
 
-    console.log("Updated.");
+    console.log("Updated chart.");
   }
 
-  const data = [
-    {
-      item: 'Lettuce',
-      expiryDate: 'Mar. 2023',
-      count: 1
+
+  async function updateListData() {
+    const { data } = await supabase
+      .from("food")
+      .select("item_name, expire_at, item_count", { count: "estimated" })
+      .eq("item_owner", "Test user 0");
+
+    if (!data) {
+      console.log("Returned data list is null.");
+      return;
     }
-  ]
+
+    const newData: TListData = data.map(d => ({
+      item: d.item_name,
+      expiryDate: (new Date(d.expire_at)).toDateString(),
+      count: d.item_count
+    }));
+
+    setListData(newData);
+  }
 
   return (
     <>
@@ -118,7 +139,7 @@ export default function Overview() {
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[450px]">
-                <FoodList data={data} />
+                <FoodList data={listData} />
               </ScrollArea>
             </CardContent>
           </StyledCard>

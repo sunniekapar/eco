@@ -6,7 +6,7 @@ type Props = {
   count: number
 }
 
-export default function FoodList({ data }: { data: Props[] }) {
+export default function FoodList({ data }: { data: Props[] | null }) {
   return (
     <Table>
       <TableCaption>A list of all the items in your fridge.</TableCaption>
@@ -18,7 +18,7 @@ export default function FoodList({ data }: { data: Props[] }) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {data.map((item, index) => (
+        {data && data.map((item, index) => (
           <TableRow key={index}>
             <TableCell className="font-medium">{item.item}</TableCell>
             <TableCell>{item.expiryDate}</TableCell>
