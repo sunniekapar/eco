@@ -28,87 +28,102 @@ import {
 import { Button } from '@/components/ui/button';
 import { RiArrowDropDownLine } from 'react-icons/ri';
 
+type TTableStats = {
+  name: string;
+  emissions: string;
+  donations: string;
+  score: string;
+}
+
+type TPastStats = {
+  [indexof: string]: {
+    dataKey: string;
+    xAxisKey: string;
+    data: {
+      name: string;
+      kg: number;
+    }[];
+  }
+}
+
 export default function Friends() {
-  const [selectedUser, setSelectedUser] = useState('0');
+  const [selectedUser, setSelectedUser] = useState("Rahul");
 
-  const [chartData, setChartData] = useState([
+  const [ pastStats, setPastStats ] = useState<TPastStats>({
+    "Rahul": {
+      dataKey: 'kg',
+      xAxisKey: 'name',
+      data: [
+        {
+          name: 'Jan.',
+          kg: 4,
+        },
+        {
+          name: 'Feb.',
+          kg: 6,
+        },
+        {
+          name: 'Mar.',
+          kg: 3,
+        },
+        {
+          name: 'Apr.',
+          kg: 5,
+        },
+        {
+          name: 'May',
+          kg: 4,
+        },
+        {
+          name: 'Jun.',
+          kg: 3,
+        },
+      ],
+    },
+    "Yash": {
+      dataKey: 'kg',
+      xAxisKey: 'name',
+      data: [
+        {
+          name: 'Jan.',
+          kg: 10,
+        },
+        {
+          name: 'Feb.',
+          kg: 6,
+        },
+        {
+          name: 'Mar.',
+          kg: 3,
+        },
+        {
+          name: 'Apr.',
+          kg: 1,
+        },
+        {
+          name: 'May',
+          kg: 4,
+        },
+        {
+          name: 'Jun.',
+          kg: 3,
+        },
+      ],
+    }
+  });
+  const [ tableData, setTableData ] = useState<TTableStats[]>([
     {
-      individualStatistics: {
-        name: 'Rahul',
-        emissions: '10 CO2 something',
-        donations: '0',
-        score: '10',
-      },
-
-      pastStatistics: {
-        dataKey: 'kg',
-        xAxisKey: 'name',
-        data: [
-          {
-            name: 'Jan.',
-            kg: 4,
-          },
-          {
-            name: 'Feb.',
-            kg: 6,
-          },
-          {
-            name: 'Mar.',
-            kg: 3,
-          },
-          {
-            name: 'Apr.',
-            kg: 5,
-          },
-          {
-            name: 'May',
-            kg: 4,
-          },
-          {
-            name: 'Jun.',
-            kg: 3,
-          },
-        ],
-      },
+      name: 'Rahul',
+      emissions: '10.2 CO2e',
+      donations: '0',
+      score: '4',
     },
     {
-      individualStatistics: {
-        name: 'Rahul 2',
-        emissions: '10 CO2 something',
-        donations: '0',
-        score: '10',
-      },
-      pastStatistics: {
-        dataKey: 'kg',
-        xAxisKey: 'name',
-        data: [
-          {
-            name: 'Jan.',
-            kg: 1,
-          },
-          {
-            name: 'Feb.',
-            kg: 6,
-          },
-          {
-            name: 'Mar.',
-            kg: 3,
-          },
-          {
-            name: 'Apr.',
-            kg: 5,
-          },
-          {
-            name: 'May',
-            kg: 4,
-          },
-          {
-            name: 'Jun.',
-            kg: 3,
-          },
-        ],
-      },
-    },
+      name: 'Yash',
+      emissions: '10 CO2e',
+      donations: '0',
+      score: '10',
+    }
   ]);
 
   return (
@@ -143,19 +158,19 @@ export default function Friends() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {chartData.map((item, index) => (
+                  {tableData && tableData.map((item, index) => (
                     <TableRow key={index}>
                       <TableCell className="font-medium">
-                        {item.individualStatistics.name}
+                        {item.name}
                       </TableCell>
                       <TableCell>
-                        {item.individualStatistics.donations}
+                        {item.donations}
                       </TableCell>
                       <TableCell>
-                        {item.individualStatistics.emissions}
+                        {item.emissions}
                       </TableCell>
                       <TableCell className="text-right">
-                        {item.individualStatistics.score}
+                        {item.score}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -172,10 +187,7 @@ export default function Friends() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="text-lg">
-                      {
-                        chartData[parseInt(selectedUser)].individualStatistics
-                          .name
-                      }
+                      { selectedUser }
                       <RiArrowDropDownLine className="text-lg ml-2" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -186,12 +198,12 @@ export default function Friends() {
                       value={selectedUser}
                       onValueChange={setSelectedUser}
                     >
-                      {chartData.map((person, index) => (
+                      {Object.keys(pastStats!).map((person, index) => (
                         <DropdownMenuRadioItem
                           key={index}
-                          value={index.toString()}
+                          value={person}
                         >
-                          {person.individualStatistics.name}
+                          {person}
                         </DropdownMenuRadioItem>
                       ))}
                     </DropdownMenuRadioGroup>
@@ -200,7 +212,7 @@ export default function Friends() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Chart {...chartData[parseInt(selectedUser)].pastStatistics} />
+              <Chart {...pastStats[selectedUser]} />
             </CardContent>
           </StyledCard>
         </div>
