@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/table';
 
 import { Progress } from '@/components/ui/progress';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,103 +28,100 @@ import {
 import { Button } from '@/components/ui/button';
 import { RiArrowDropDownLine } from 'react-icons/ri';
 
+import { PostgrestResponse, createClient } from "@supabase/supabase-js";
+
+const SUPABASE_PROJECT_URL="https://ebsamovagbktsulxqrzi.supabase.co"
+const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVic2Ftb3ZhZ2JrdHN1bHhxcnppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDgxNDA0NTMsImV4cCI6MjAyMzcxNjQ1M30.MgTZj2K4a7HydhTDNdVDDEKqtT8aSHkkCGPECvrJ-GM"
+
+const supabase = createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
+
 type TTableStats = {
   name: string;
-  emissions: string;
-  donations: string;
-  score: string;
+  emissions: number;
+  donations: number;
+  score: number;
 }
 
 type TPastStats = {
-  [indexof: string]: {
-    dataKey: string;
-    xAxisKey: string;
-    data: {
-      name: string;
-      kg: number;
-    }[];
-  }
+  dataKey: string;
+  xAxisKey: string;
+  data: {
+    name: string;
+    kg: number;
+  }[];
 }
 
 export default function Friends() {
   const [selectedUser, setSelectedUser] = useState("Rahul");
 
-  const [ pastStats, setPastStats ] = useState<TPastStats>({
-    "Rahul": {
-      dataKey: 'kg',
-      xAxisKey: 'name',
-      data: [
-        {
-          name: 'Jan.',
-          kg: 4,
-        },
-        {
-          name: 'Feb.',
-          kg: 6,
-        },
-        {
-          name: 'Mar.',
-          kg: 3,
-        },
-        {
-          name: 'Apr.',
-          kg: 5,
-        },
-        {
-          name: 'May',
-          kg: 4,
-        },
-        {
-          name: 'Jun.',
-          kg: 3,
-        },
-      ],
-    },
-    "Yash": {
-      dataKey: 'kg',
-      xAxisKey: 'name',
-      data: [
-        {
-          name: 'Jan.',
-          kg: 10,
-        },
-        {
-          name: 'Feb.',
-          kg: 6,
-        },
-        {
-          name: 'Mar.',
-          kg: 3,
-        },
-        {
-          name: 'Apr.',
-          kg: 1,
-        },
-        {
-          name: 'May',
-          kg: 4,
-        },
-        {
-          name: 'Jun.',
-          kg: 3,
-        },
-      ],
-    }
-  });
+  const [ pastStats, setPastStats ] = useState(new Map<string, TPastStats>());
   const [ tableData, setTableData ] = useState<TTableStats[]>([
     {
       name: 'Rahul',
-      emissions: '10.2 CO2e',
-      donations: '0',
-      score: '4',
+      emissions: 10,
+      donations: 0,
+      score: 4,
     },
     {
       name: 'Yash',
-      emissions: '10 CO2e',
-      donations: '0',
-      score: '10',
+      emissions: 8,
+      donations: 0,
+      score: 9,
     }
   ]);
+
+  async function updateEverything() {
+    const { data } = await supabase
+      .from("user_data")
+      .select("name, footprint, num_donations, num_points, history") as PostgrestResponse<{
+        name: string,
+        footprint: number,
+        num_donations: number,
+        num_points: number,
+        history: number[]
+    }>;
+
+    if (!data) {
+      console.log("updateEverything() returned null");
+      return;
+    }
+
+    const nextTableData = data.map(d => ({
+      name: d.name,
+      emissions: d.footprint*1.9,
+      donations: d.num_donations,
+      score: d.num_points,
+    }));
+    setTableData(nextTableData);
+    setSelectedUser(data[0].name);
+
+    const m = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "June", "July", "Aug.", "Sept.", "Oct.", "Nov.", "Dec"]
+
+    data.map(d => {
+
+      const nextData: {
+        name: string,
+        kg: number
+      }[] = d.history.map((h, i) => ({
+        name: m[i],
+        kg: h
+      }));
+
+      const nextStateElem = {
+        dataKey: 'kg',
+        xAxisKey: 'name',
+        data: nextData,
+      }
+
+      setPastStats(prevState => prevState.set(d.name, nextStateElem));
+    })
+
+    
+  }
+
+  useEffect(() => {
+    updateEverything();
+  }, [])
 
   return (
     <>
@@ -198,12 +195,12 @@ export default function Friends() {
                       value={selectedUser}
                       onValueChange={setSelectedUser}
                     >
-                      {Object.keys(pastStats!).map((person, index) => (
+                      {Array.from(pastStats).map((m) => (
                         <DropdownMenuRadioItem
-                          key={index}
-                          value={person}
+                          key={m[0]}
+                          value={m[0]}
                         >
-                          {person}
+                          {m[0]}
                         </DropdownMenuRadioItem>
                       ))}
                     </DropdownMenuRadioGroup>
@@ -212,7 +209,7 @@ export default function Friends() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Chart {...pastStats[selectedUser]} />
+              <Chart {...pastStats.get(selectedUser)} />
             </CardContent>
           </StyledCard>
         </div>
