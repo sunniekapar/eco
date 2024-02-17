@@ -79,6 +79,8 @@ export default function Overview() {
   };
   const [ chartData, setChartData ] = useState(chartDataDefault);
   const [ listData, setListData ] = useState<TListData|null>(null);
+  const [ numDonations, setNumDonations ] = useState(0);
+  const [ footprint, setFootprint ] = useState(0);
 
   useEffect(() => {
     updateChartData();
@@ -88,8 +90,16 @@ export default function Overview() {
   async function updateChartData() {
     const { data } = await supabase
       .from("user_data")
-      .select("history")
+      .select("history, num_donations, footprint")
       .eq("name", "Test user 0");
+
+    if (!data) {
+      console.log("Data from user_data is null.")
+      return;
+    }
+
+    setNumDonations(data[0].num_donations);
+    setFootprint(data[0].footprint);
 
     const nextChartData: {
         name: string;
@@ -149,7 +159,7 @@ export default function Overview() {
             <StyledCard>
               <CardHeader>
                 <CardTitle className="text-md">Carbon Footprint</CardTitle>
-                <h2 className="text-2xl font-bold">40%</h2>
+                <h2 className="text-2xl font-bold">{footprint}%</h2>
                 <p className="mt-1 text-muted-foreground text-sm">
                   Some description idk rn
                 </p>
@@ -170,7 +180,7 @@ export default function Overview() {
             <StyledCard>
               <CardHeader>
                 <CardTitle className="text-md">Donations</CardTitle>
-                <h2 className="text-2xl font-bold">10</h2>
+                <h2 className="text-2xl font-bold">{numDonations}</h2>
                 <p className="mt-1 text-muted-foreground text-sm">
                   In the last week
                 </p>
