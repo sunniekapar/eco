@@ -74,11 +74,39 @@ module.exports = {
             opacity: '25%',
           },
         },
+        appear: {
+          '0%': {
+            transform: 'translateY(2rem)',
+            opacity: '0',
+          },
+
+          '100%': {
+            opacity: '100%',
+            transform: 'translateY(0)',
+          },
+        },
+        blob: {
+          '0%': {
+            transform: 'translate(0px, 0px) scale(1)',
+          },
+          '33%': {
+            transform: 'translate(30px, -50px) scale(1.1)',
+          },
+          '66%': {
+            transform: 'translate(-20px, 20px) scale(0.9)',
+          },
+          '100%': {
+            transform: 'tranlate(0px, 0px) scale(1)',
+          },
+        },
       },
+
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         breathe: 'breathe 10s infinite ease-in-out',
+        appear: 'appear 1s ease-in-out',
+        blob: 'blob 7s infinite',
       },
     },
   },

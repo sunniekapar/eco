@@ -1,3 +1,4 @@
+import { FoodWasteProps } from '@/types';
 import {
   Area,
   AreaChart,
@@ -8,11 +9,16 @@ import {
   YAxis,
 } from 'recharts';
 
-export default function Chart({xAxisKey, dataKey, data} : any ) {
+export default function Chart(data: FoodWasteProps) {
+  const chartData = {
+    dataKey: 'kg',
+    xAxisKey: 'name',
+    data: Object.values(data),
+  };
   return (
     <ResponsiveContainer width="100%" height={375}>
       <AreaChart
-        data={data}
+        data={chartData.data}
         margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
       >
         <defs>
@@ -21,7 +27,7 @@ export default function Chart({xAxisKey, dataKey, data} : any ) {
             <stop offset="95%" stopColor="#137547" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <XAxis tickLine={false} dataKey={xAxisKey} />
+        <XAxis tickLine={false} dataKey={chartData.xAxisKey} />
         <YAxis tickLine={false} tickMargin={16} />
         <CartesianGrid strokeOpacity={0.2} vertical={false} />
         <Tooltip
@@ -35,7 +41,7 @@ export default function Chart({xAxisKey, dataKey, data} : any ) {
         />
         <Area
           type="linear"
-          dataKey={dataKey}
+          dataKey={chartData.dataKey}
           stroke="#137547"
           fillOpacity={1}
           fill="url(#color)"
